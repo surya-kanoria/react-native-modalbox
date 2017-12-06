@@ -9,8 +9,7 @@ var {
     Animated,
     TouchableWithoutFeedback,
     Dimensions,
-    Easing,
-    Platform
+    Easing
 } = require('react-native');
 
 var screen = Dimensions.get('window');
@@ -73,7 +72,6 @@ var ModalBox = createReactClass({
 
     getInitialState: function () {
         var position = this.props.entry === 'top' ? -screen.height : screen.height;
-        this.touchHandler = this.touchHandler.bind(this);
         return {
             position: new Animated.Value(position),
             backdropOpacity: new Animated.Value(0),
@@ -89,16 +87,16 @@ var ModalBox = createReactClass({
         };
     },
 
-    componentWillMount: function () {
+    componentWillMount: function() {
         this.createPanResponder();
         this.handleOpenning(this.props);
     },
 
-    componentWillReceiveProps: function (props) {
+    componentWillReceiveProps: function(props) {
         this.handleOpenning(props);
     },
 
-    handleOpenning: function (props) {
+    handleOpenning: function(props) {
         if (typeof props.isOpen == "undefined") return;
         if (props.isOpen)
             this.open();
@@ -111,7 +109,7 @@ var ModalBox = createReactClass({
     /*
      * Open animation for the backdrop, will fade in
      */
-    animateBackdropOpen: function () {
+    animateBackdropOpen: function() {
         if (this.state.isAnimateBackdrop) {
             this.state.animBackdrop.stop();
             this.state.isAnimateBackdrop = false;
@@ -127,13 +125,13 @@ var ModalBox = createReactClass({
         );
         this.state.animBackdrop.start(() => {
             this.state.isAnimateBackdrop = false;
-        });
+    });
     },
 
     /*
      * Close animation for the backdrop, will fade out
      */
-    animateBackdropClose: function () {
+    animateBackdropClose: function() {
         if (this.state.isAnimateBackdrop) {
             this.state.animBackdrop.stop();
             this.state.isAnimateBackdrop = false;
@@ -149,13 +147,13 @@ var ModalBox = createReactClass({
         );
         this.state.animBackdrop.start(() => {
             this.state.isAnimateBackdrop = false;
-        });
+    });
     },
 
     /*
      * Stop opening animation
      */
-    stopAnimateOpen: function () {
+    stopAnimateOpen: function() {
         if (this.state.isAnimateOpen) {
             if (this.state.animOpen) this.state.animOpen.stop();
             this.state.isAnimateOpen = false;
@@ -165,7 +163,7 @@ var ModalBox = createReactClass({
     /*
      * Open animation for the modal, will move up
      */
-    animateOpen: function () {
+    animateOpen: function() {
         this.stopAnimateClose();
 
         // Backdrop fadeIn
@@ -186,15 +184,15 @@ var ModalBox = createReactClass({
         );
         this.state.animOpen.start(() => {
             this.state.isAnimateOpen = false;
-            this.state.isOpen = true;
-            if (this.props.onOpened) this.props.onOpened();
-        });
+        this.state.isOpen = true;
+        if (this.props.onOpened) this.props.onOpened();
+    });
     },
 
     /*
      * Stop closing animation
      */
-    stopAnimateClose: function () {
+    stopAnimateClose: function() {
         if (this.state.isAnimateClose) {
             if (this.state.animClose) this.state.animClose.stop();
             this.state.isAnimateClose = false;
@@ -204,7 +202,7 @@ var ModalBox = createReactClass({
     /*
      * Close animation for the modal, will move down
      */
-    animateClose: function () {
+    animateClose: function() {
         this.stopAnimateOpen();
 
         // Backdrop fadeout
@@ -221,16 +219,16 @@ var ModalBox = createReactClass({
         );
         this.state.animClose.start(() => {
             this.state.isAnimateClose = false;
-            this.state.isOpen = false;
-            this.setState({});
-            if (this.props.onClosed) this.props.onClosed();
-        });
+        this.state.isOpen = false;
+        this.setState({});
+        if (this.props.onClosed) this.props.onClosed();
+    });
     },
 
     /*
      * Calculate when should be placed the modal
      */
-    calculateModalPosition: function (containerHeight, containerWidth) {
+    calculateModalPosition: function(containerHeight, containerWidth) {
         var position = 0;
 
         if (this.props.position == "bottom") {
@@ -248,14 +246,13 @@ var ModalBox = createReactClass({
      * Create the pan responder to detect gesture
      * Only used if swipeToClose is enabled
      */
-    createPanResponder: function () {
+    createPanResponder: function() {
         var closingState = false;
-        var inSwipeArea = false;
+        var inSwipeArea  = false;
 
-        var onPanRelease = (evt, state) => {
+        var onPanRelease = (evt, state) => {
             if (!inSwipeArea) return;
             inSwipeArea = false;
-            console.log(evt);
             if (this.props.entry === 'top' ? -state.dy > this.props.swipeThreshold : state.dy > this.props.swipeThreshold)
                 this.animateClose();
             else
@@ -265,7 +262,6 @@ var ModalBox = createReactClass({
         var animEvt = Animated.event([null, {customY: this.state.position}]);
 
         var onPanMove = (evt, state) => {
-            console.log(evt);
             var newClosingState = this.props.entry === 'top' ? -state.dy > this.props.swipeThreshold : state.dy > this.props.swipeThreshold;
             if (this.props.entry === 'top' ? state.dy > 0 : state.dy < 0) return;
             if (newClosingState != closingState && this.props.onClosingState)
@@ -277,7 +273,6 @@ var ModalBox = createReactClass({
         };
 
         var onPanStart = (evt, state) => {
-            console.log(evt);
             if (!this.props.swipeToClose || this.props.isDisabled || (this.props.swipeArea && (evt.nativeEvent.pageY - this.state.positionDest) > this.props.swipeArea)) {
                 inSwipeArea = false;
                 return false;
@@ -297,7 +292,7 @@ var ModalBox = createReactClass({
     /*
      * Event called when the modal view layout is calculated
      */
-    onViewLayout: function (evt) {
+    onViewLayout: function(evt) {
         this.state.height = evt.nativeEvent.layout.height;
         this.state.width = evt.nativeEvent.layout.width;
 
@@ -307,7 +302,7 @@ var ModalBox = createReactClass({
     /*
      * Event called when the container view layout is calculated
      */
-    onContainerLayout: function (evt) {
+    onContainerLayout: function(evt) {
         var height = evt.nativeEvent.layout.height;
         var width = evt.nativeEvent.layout.width;
 
@@ -341,95 +336,78 @@ var ModalBox = createReactClass({
             containerHeight: height,
             containerWidth: width,
             ...coords
-        });
+    });
     },
 
     /*
      * Render the backdrop element
      */
-    renderBackdrop: function (size) {
-        var backdrop = [];
+    renderBackdrop: function(size) {
+        var backdrop  = [];
 
         if (this.props.backdrop) {
             backdrop = (
                 <TouchableWithoutFeedback onPress={this.props.backdropPressToClose ? this.close : null}>
-                    <Animated.View style={[styles.absolute, size, {opacity: this.state.backdropOpacity}]}>
-                        <View style={[styles.absolute, {
-                            backgroundColor: this.props.backdropColor,
-                            opacity: this.props.backdropOpacity
-                        }]}/>
-                        {this.props.backdropContent || []}
-                    </Animated.View>
-                </TouchableWithoutFeedback>
-            );
+        <Animated.View style={[styles.absolute, size, {opacity: this.state.backdropOpacity}]}>
+        <View style={[styles.absolute, {backgroundColor:this.props.backdropColor, opacity: this.props.backdropOpacity}]}/>
+            {this.props.backdropContent || []}
+        </Animated.View>
+            </TouchableWithoutFeedback>
+        );
         }
 
         return backdrop;
     },
 
-    touchHandler: function (event) {
-        event.preventDefault();
-    },
-
     /*
      * Render the component
      */
-    render: function () {
-        var visible = this.state.isOpen || this.state.isAnimateOpen || this.state.isAnimateClose;
-        var size = {height: this.state.containerHeight, width: this.state.containerWidth};
-        var offsetX = (this.state.containerWidth - this.state.width) / 2;
-        var backdrop = this.renderBackdrop(size);
+    render: function() {
+        var visible     = this.state.isOpen || this.state.isAnimateOpen || this.state.isAnimateClose;
+        var size        = {height: this.state.containerHeight, width: this.state.containerWidth};
+        var offsetX     = (this.state.containerWidth - this.state.width) / 2;
+        var backdrop    = this.renderBackdrop(size);
 
-        if (!visible) {
-            if (Platform.OS === 'web') {
-                document.removeEventListener('touchstart', this.touchHandler);
-                document.removeEventListener('touchmove', this.touchHandler);
-            }
-            return <View/>;
-        }
-        if (Platform.OS === 'web') {
-            document.addEventListener('touchstart', this.touchHandler, {passive: false});
-            document.addEventListener('touchmove', this.touchHandler, {passive: false});
-        }
+        if (!visible) return <View/>
+
         return (
-            <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'}
-                  onLayout={this.onContainerLayout}>
-                {backdrop}
-                <Animated.View
-                    onLayout={this.onViewLayout}
-                    style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]}]}
-                    {...this.state.pan.panHandlers}>
-                    {this.props.children}
-                </Animated.View>
-            </View>
+            <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'} onLayout={this.onContainerLayout}>
+        {backdrop}
+        <Animated.View
+        onLayout={this.onViewLayout}
+        style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]} ]}
+        {...this.state.pan.panHandlers}>
+        {this.props.children}
+        </Animated.View>
+        </View>
         );
     },
 
     /****************** PUBLIC METHODS **********************/
 
-    open: function () {
+    open: function() {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateOpen && (!this.state.isOpen || this.state.isAnimateClose)) {
             this.onViewLayoutCalculated = () => {
                 this.setState({});
                 this.animateOpen();
             };
-            this.setState({isAnimateOpen: true});
+            this.setState({isAnimateOpen : true});
         }
-        if (window && window.history && window.history.pushState) {
-            window.history.pushState(null, document.title, window.location.href,)
+        if(window && window.history && window.history.pushState) {
+            window.history.pushState(null,document.title ,window.location.href,)
             window.addEventListener('popstate', function () {
                 this.close(false);
             }.bind(this));
         }
     },
 
-    close: function (goBack = true) {
+    close: function(goBack = true) {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen)) {
             delete this.onViewLayoutCalculated;
             this.animateClose();
-            if (goBack && window && window.history && window.history.back) {
+            if(goBack && window && window.history && window.history.back) {
                 window.history.back();
             }
         }
