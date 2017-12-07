@@ -72,6 +72,8 @@ var ModalBox = createReactClass({
 
     getInitialState: function () {
         var position = this.props.entry === 'top' ? -screen.height : screen.height;
+        this.touchStart = this.touchStart.bind(this);
+        this.touchHandleMove = this.touchHandleMove.bind(this);
         return {
             position: new Animated.Value(position),
             backdropOpacity: new Animated.Value(0),
@@ -125,7 +127,7 @@ var ModalBox = createReactClass({
         );
         this.state.animBackdrop.start(() => {
             this.state.isAnimateBackdrop = false;
-    });
+        });
     },
 
     /*
@@ -147,7 +149,7 @@ var ModalBox = createReactClass({
         );
         this.state.animBackdrop.start(() => {
             this.state.isAnimateBackdrop = false;
-    });
+        });
     },
 
     /*
@@ -184,9 +186,9 @@ var ModalBox = createReactClass({
         );
         this.state.animOpen.start(() => {
             this.state.isAnimateOpen = false;
-        this.state.isOpen = true;
-        if (this.props.onOpened) this.props.onOpened();
-    });
+            this.state.isOpen = true;
+            if (this.props.onOpened) this.props.onOpened();
+        });
     },
 
     /*
@@ -219,10 +221,10 @@ var ModalBox = createReactClass({
         );
         this.state.animClose.start(() => {
             this.state.isAnimateClose = false;
-        this.state.isOpen = false;
-        this.setState({});
-        if (this.props.onClosed) this.props.onClosed();
-    });
+            this.state.isOpen = false;
+            this.setState({});
+            if (this.props.onClosed) this.props.onClosed();
+        });
     },
 
     /*
@@ -336,7 +338,7 @@ var ModalBox = createReactClass({
             containerHeight: height,
             containerWidth: width,
             ...coords
-    });
+        });
     },
 
     /*
@@ -348,16 +350,29 @@ var ModalBox = createReactClass({
         if (this.props.backdrop) {
             backdrop = (
                 <TouchableWithoutFeedback onPress={this.props.backdropPressToClose ? this.close : null}>
-        <Animated.View style={[styles.absolute, size, {opacity: this.state.backdropOpacity}]}>
-        <View style={[styles.absolute, {backgroundColor:this.props.backdropColor, opacity: this.props.backdropOpacity}]}/>
-            {this.props.backdropContent || []}
-        </Animated.View>
-            </TouchableWithoutFeedback>
-        );
+                    <Animated.View style={[styles.absolute, size, {opacity: this.state.backdropOpacity}]}>
+                        <View style={[styles.absolute, {backgroundColor:this.props.backdropColor, opacity: this.props.backdropOpacity}]}/>
+                        {this.props.backdropContent || []}
+                    </Animated.View>
+                </TouchableWithoutFeedback>
+            );
         }
 
         return backdrop;
     },
+
+    touchStart: function(e) {
+        this.lastTouch = e.touches[0].clientY
+    },
+
+    touchHandleMove: function(e) {
+        let currentTouch = e.touches[0].clientY;
+        if(this.lastTouch < currentTouch) {
+            this.lastTouch = currentTouch;
+            e.preventDefault();
+        }
+    },
+
 
     /*
      * Render the component
@@ -368,18 +383,23 @@ var ModalBox = createReactClass({
         var offsetX     = (this.state.containerWidth - this.state.width) / 2;
         var backdrop    = this.renderBackdrop(size);
 
-        if (!visible) return <View/>
-
+        if (!visible){
+            document.body.removeEventListener('touchstart', this.touchStart);
+            document.body.removeEventListener('touchmove', this.touchHandleMove);
+            return <View/>
+        }
+        document.body.addEventListener('touchstart', this.touchStart, {passive: false});
+        document.body.addEventListener('touchmove', this.touchHandleMove, {passive: false});
         return (
             <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'} onLayout={this.onContainerLayout}>
-        {backdrop}
-        <Animated.View
-        onLayout={this.onViewLayout}
-        style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]} ]}
-        {...this.state.pan.panHandlers}>
-        {this.props.children}
-        </Animated.View>
-        </View>
+                {backdrop}
+                <Animated.View
+                    onLayout={this.onViewLayout}
+                    style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]} ]}
+                    {...this.state.pan.panHandlers}>
+                    {this.props.children}
+                </Animated.View>
+            </View>
         );
     },
 
