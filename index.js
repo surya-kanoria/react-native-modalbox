@@ -9,7 +9,8 @@ var {
     Animated,
     TouchableWithoutFeedback,
     Dimensions,
-    Easing
+    Easing,
+    Platform
 } = require('react-native');
 
 var screen = Dimensions.get('window');
@@ -273,7 +274,7 @@ var ModalBox = createReactClass({
         };
 
         var onPanStart = (evt, state) => {
-            if (!this.props.swipeToClose || this.props.isDisabled || (this.props.swipeArea && (evt.nativeEvent.pageY - this.state.positionDest) > this.props.swipeArea)) {
+            if (!this.props.swipeToClose || Platform.OS !== 'web' || this.props.isDisabled || (this.props.swipeArea && (evt.nativeEvent.pageY - this.state.positionDest) > this.props.swipeArea)) {
                 inSwipeArea = false;
                 return false;
             }
