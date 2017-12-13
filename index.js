@@ -72,8 +72,6 @@ var ModalBox = createReactClass({
 
     getInitialState: function () {
         var position = this.props.entry === 'top' ? -screen.height : screen.height;
-        this.touchStart = this.touchStart.bind(this);
-        this.touchHandleMove = this.touchHandleMove.bind(this);
         return {
             position: new Animated.Value(position),
             backdropOpacity: new Animated.Value(0),
@@ -361,19 +359,6 @@ var ModalBox = createReactClass({
         return backdrop;
     },
 
-    touchStart: function(e) {
-        this.lastTouch = e.touches[0].clientY
-    },
-
-    touchHandleMove: function(e) {
-        let currentTouch = e.touches[0].clientY;
-        if(this.lastTouch < currentTouch) {
-            this.lastTouch = currentTouch;
-            e.preventDefault();
-        }
-    },
-
-
     /*
      * Render the component
      */
@@ -384,12 +369,8 @@ var ModalBox = createReactClass({
         var backdrop    = this.renderBackdrop(size);
 
         if (!visible){
-            document.body.removeEventListener('touchstart', this.touchStart);
-            document.body.removeEventListener('touchmove', this.touchHandleMove);
             return <View/>
         }
-        document.body.addEventListener('touchstart', this.touchStart, {passive: false});
-        document.body.addEventListener('touchmove', this.touchHandleMove, {passive: false});
         return (
             <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'} onLayout={this.onContainerLayout}>
                 {backdrop}
