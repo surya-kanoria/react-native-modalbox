@@ -377,7 +377,7 @@ var ModalBox = createReactClass({
                 {backdrop}
                 <Animated.View
                     onLayout={this.onViewLayout}
-                    style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]} ]}
+                    style={[styles.wrapper, size, this.props.style, {transform: [{translateY: this.state.position}, {translateX: offsetX}]}, Platform.OS === 'web' ? {willChange: 'transform'}: {}]}
                     {...this.state.pan.panHandlers}>
                     {this.props.children}
                 </Animated.View>
