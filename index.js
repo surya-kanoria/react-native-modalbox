@@ -348,7 +348,7 @@ var ModalBox = createReactClass({
 
         if (this.props.backdrop) {
             backdrop = (
-                <TouchableWithoutFeedback onPress={this.props.backdropPressToClose ? this.close : null}>
+                <TouchableWithoutFeedback onPress={this.props.backdropPressToClose ? () => {this.close()} : null}>
                     <Animated.View style={[styles.absolute, size, {opacity: this.state.backdropOpacity}]}>
                         <View style={[styles.absolute, {backgroundColor:this.props.backdropColor, opacity: this.props.backdropOpacity}]}/>
                         {this.props.backdropContent || []}
