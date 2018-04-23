@@ -399,12 +399,12 @@ var ModalBox = createReactClass({
         if(window && window.history && window.history.pushState) {
             window.history.pushState(null,document.title ,window.location.href,)
             window.addEventListener('popstate', function () {
-                this.close(false);
+                this.close();
             }.bind(this));
         }
     },
 
-    close: function(goBack = true) {
+    close: function(goBack = false) {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen)) {
             delete this.onViewLayoutCalculated;
