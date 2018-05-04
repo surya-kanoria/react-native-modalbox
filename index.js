@@ -179,8 +179,7 @@ var ModalBox = createReactClass({
             this.state.position,
             {
                 toValue: this.state.positionDest,
-                duration: this.props.animationDuration,
-                easing: Easing.elastic(0.8)
+                duration: this.props.animationDuration
             }
         );
         this.state.animOpen.start(() => {
