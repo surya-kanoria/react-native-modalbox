@@ -179,7 +179,8 @@ var ModalBox = createReactClass({
             this.state.position,
             {
                 toValue: this.state.positionDest,
-                duration: this.props.animationDuration
+                duration: this.props.animationDuration,
+                easing: Easing.bezier(0.4,0,0.2,1)
             }
         );
         this.state.animOpen.start(() => {
@@ -214,7 +215,8 @@ var ModalBox = createReactClass({
             this.state.position,
             {
                 toValue: this.props.entry === 'top' ? -this.state.containerHeight : this.state.containerHeight,
-                duration: this.props.animationDuration
+                duration: this.props.animationDuration,
+                easing: Easing.bezier(0.4,0,0.2,1)
             }
         );
         this.state.animClose.start(() => {
@@ -398,12 +400,12 @@ var ModalBox = createReactClass({
         if(window && window.history && window.history.pushState) {
             window.history.pushState(null,document.title ,window.location.href,)
             window.addEventListener('popstate', function () {
-                this.close();
+                this.close(false);
             }.bind(this));
         }
     },
 
-    close: function(goBack = false) {
+    close: function(goBack = true) {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen)) {
             delete this.onViewLayoutCalculated;
