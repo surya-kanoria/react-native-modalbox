@@ -233,10 +233,13 @@ var ModalBox = createReactClass({
     calculateModalPosition: function(containerHeight, containerWidth) {
         var position = 0;
 
-        if (this.props.position == "bottom") {
-            position = containerHeight - this.state.height;
-        }
-        else if (this.props.position == "center") {
+        if (this.props.position == 'bottom') {
+            if (containerHeight != this.state.height) {
+                position = containerHeight - this.state.height;
+            } else {
+                position = containerHeight;
+            }
+        } else if (this.props.position == 'center') {
             position = containerHeight / 2 - this.state.height / 2;
         }
         // Checking if the position >= 0
