@@ -214,7 +214,7 @@ var ModalBox = createReactClass({
         this.state.animClose = Animated.timing(
             this.state.position,
             {
-                toValue: this.props.entry === 'top' ? -this.state.containerHeight : this.state.containerHeight,
+                toValue: this.props.entry === 'top' ? -(this.state.containerHeight + screen.height) : (this.state.containerHeight + screen.height),
                 duration: this.props.animationDuration,
                 easing: Easing.bezier(0.4,0,0.2,1)
             }
