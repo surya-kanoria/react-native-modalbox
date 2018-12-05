@@ -398,14 +398,15 @@ var ModalBox = createReactClass({
                 this.setState({});
                 this.animateOpen();
             };
-            this.setState({isAnimateOpen : true});
+			this.setState({isAnimateOpen : true});
+			if(window && window.history && window.history.pushState) {
+				window.history.pushState(null,document.title ,window.location.href,)
+				window.addEventListener('popstate', function () {
+					this.close(false);
+				}.bind(this));
+			}
         }
-        if(window && window.history && window.history.pushState) {
-            window.history.pushState(null,document.title ,window.location.href,)
-            window.addEventListener('popstate', function () {
-                this.close(false);
-            }.bind(this));
-        }
+        
     },
 
     close: function(goBack = true) {
