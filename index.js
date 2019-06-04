@@ -197,7 +197,15 @@ export default class ModalBox extends React.Component{
     calculateModalPosition = (containerHeight, containerWidth) => {
         var position = 0;
         if (this.props.position == 'bottom') {
-            position = containerHeight - this.state.height;
+            if(this.props.resizeToFullscreen) {
+                position = containerHeight - this.state.height;
+            } else {
+                if (containerHeight != this.state.height) {
+                    position = containerHeight - this.state.height;
+                } else {
+                    position = containerHeight;
+                }
+            }
         } else if (this.props.position == 'center') {
             position = containerHeight / 2 - this.state.height / 2;
         }
@@ -329,19 +337,17 @@ export default class ModalBox extends React.Component{
         if (!visible) {
             return <View />
         }
-        return (
-            <Portal>
-                <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'} onLayout={this.onContainerLayout}>
-                    {backdrop}
-                    <Animated.View
-                        onLayout={this.onViewLayout}
-                        style={[styles.wrapper, size, this.props.style, { transform: [{ translateY: this.state.position }, { translateX: offsetX }] }, Platform.OS === 'web' ? { willChange: 'transform' } : {}]}
-                        {...this.state.pan.panHandlers}>
-                        {this.props.children}
-                    </Animated.View>
-                </View>
-            </Portal>
-        );
+        const content = <View style={[styles.transparent, styles.absolute]} pointerEvents={'box-none'} onLayout={this.onContainerLayout}>
+            {backdrop}
+            <Animated.View
+                onLayout={this.onViewLayout}
+                style={[styles.wrapper, size, this.props.style, { transform: [{ translateY: this.state.position }, { translateX: offsetX }] }, Platform.OS === 'web' ? { willChange: 'transform' } : {}]}
+                {...this.state.pan.panHandlers}>
+                {this.props.children}
+            </Animated.View>
+        </View>;
+        const modalBox = this.props.showFullscreen ? <Portal>{content}</Portal> : content;
+        return modalBox;
     }
 
     /****************** PUBLIC METHODS **********************/
@@ -386,5 +392,7 @@ ModalBox.defaultProps = {
     backdropColor: "black",
     backdropContent: null,
     animationDuration: 400,
-    inplace: false
+    inplace: false,
+    showFullscreen: false,
+    resizeToFullscreen: false
 }
