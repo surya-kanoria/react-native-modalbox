@@ -361,23 +361,33 @@ export default class ModalBox extends React.Component{
             };
             this.setState({ isAnimateOpen: true });
             if (window && window.history && window.history.pushState) {
-                window.history.pushState(null, document.title, window.location.href)
-                window.addEventListener('popstate', function () {
-                    this.close(false);
-                }.bind(this));
+                // Since we can have multiple instances of modalBox then all instances will listen to popstate.
+                // So all the instance will close with a single back.
+                // To make it work we will pass the id (default id is 'MODAL_BOX') to each instance and we will use that id to decide which instance to close.
+                window.currState = {id: this.props.id};
+                window.history.pushState(window.currState, document.title, window.location.href);
+                window.addEventListener('popstate', (event) => {
+                    if(window.currState.id === this.props.id && this.state.isOpen) {
+                        window.currState = event.state;
+                        this.closeModal();
+                    }
+                });
             }
         }
-
     }
 
-    close = (goBack = true) => {
+    closeModal = () => {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen)) {
             delete this.onViewLayoutCalculated;
             this.animateClose();
-            if (goBack && window && window.history && window.history.back) {
-                window.history.back();
-            }
+        }
+    }
+
+    close = () => {
+        if (this.props.isDisabled) return;
+        if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen) && window && window.history) {
+            window.history.back();
         }
     }
 };
@@ -394,5 +404,6 @@ ModalBox.defaultProps = {
     animationDuration: 400,
     inplace: false,
     showFullscreen: false,
-    resizeToFullscreen: false
+    resizeToFullscreen: false,
+    id: 'MODAL_BOX'
 }
