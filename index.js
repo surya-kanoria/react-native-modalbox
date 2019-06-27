@@ -58,7 +58,10 @@ export default class ModalBox extends React.Component{
     }
 
     componentWillReceiveProps(nextProps) {
-        this.handleOpenning(nextProps);
+        // Since handleOpenning only checks for isOpen, so we should have a check here for the prop change.
+        if(nextProps.isOpen !== this.props.isOpen) {
+            this.handleOpenning(nextProps);
+        }
     }
 
     handleOpenning = (props) => {
