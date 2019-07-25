@@ -14,7 +14,7 @@ export default class Portal extends Component {
 
   componentDidMount() {
     const el = document.createElement('div');
-    el.setAttribute("style", "position: fixed;top: 0;left: 0;bottom: 0;right: 0;");
+    el.setAttribute("style", "position: fixed;top: 0;left: 0;bottom: 0;right: 0;z-index: 100;");
     this.setState(
       { el, target: document.body },
       () => {

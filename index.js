@@ -369,12 +369,24 @@ export default class ModalBox extends React.Component{
                 // To make it work we will pass the id (default id is 'MODAL_BOX') to each instance and we will use that id to decide which instance to close.
                 window.currState = {id: this.props.id};
                 window.history.pushState(window.currState, document.title, window.location.href);
-                window.addEventListener('popstate', (event) => {
-                    if(window.currState.id === this.props.id && this.state.isOpen) {
-                        window.currState = event.state;
-                        this.closeModal();
-                    }
-                });
+                // added a registry in batman that will subscribe to popstate once and we will subscribe to registry to avoid multiple onpopstate subscriptions.
+                if (window.HistoryPopStateRegistry) {
+                    window.HistoryPopStateRegistry.subscribe({callback: this.popStateHandler, stopImmediatePropagation: this.props.stopImmediatePropagation});
+                } else {
+                    window.addEventListener('popstate', this.popStateHandler);
+                }
+            }
+        }
+    }
+
+    popStateHandler = (event) => {
+        if(window.currState && window.currState.id === this.props.id && this.state.isOpen) {
+            window.currState = event.state;
+            this.closeModal();
+            if (window.HistoryPopStateRegistry) {
+                window.HistoryPopStateRegistry.unsubscribe({callback: this.popStateHandler});
+            } else {
+                window.removeEventListener('popstate', this.popStateHandler);
             }
         }
     }
@@ -408,5 +420,6 @@ ModalBox.defaultProps = {
     inplace: false,
     showFullscreen: false,
     resizeToFullscreen: false,
-    id: 'MODAL_BOX'
+    id: 'MODAL_BOX',
+    stopImmediatePropagation: false
 }
