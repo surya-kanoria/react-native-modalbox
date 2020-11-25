@@ -21,10 +21,12 @@ export default class Portal extends Component {
         this.state.target.appendChild(this.state.el);
       }
     );
+    document.body.style.overflow = 'hidden';
   }
 
   componentWillUnmount() {
     this.state.target.removeChild(this.state.el);
+    document.body.style.overflow = 'visible';
   }
 
   render() {
