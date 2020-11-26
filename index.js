@@ -362,7 +362,7 @@ export default class ModalBox extends React.Component{
                 this.animateOpen();
             };
             this.setState({ isAnimateOpen: true });
-            if (window && window.history && window.history.pushState) {
+            if (window && window.history && window.history.pushState && this.props.shouldAddToHistory) {
                 // Since we can have multiple instances of modalBox then all instances will listen to popstate.
                 // So all the instance will close with a single back.
                 // To make it work we will pass the id (default id is 'MODAL_BOX') to each instance and we will use that id to decide which instance to close.
@@ -400,7 +400,7 @@ export default class ModalBox extends React.Component{
 
     close = () => {
         if (this.props.isDisabled) return;
-        if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen) && window && window.history) {
+        if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen) && window && window.history && this.props.shouldAddToHistory) {
             window.history.back();
         }
     }
@@ -420,5 +420,6 @@ ModalBox.defaultProps = {
     showFullscreen: false,
     resizeToFullscreen: false,
     id: 'MODAL_BOX',
-    stopImmediatePropagation: false
+    stopImmediatePropagation: false,
+    shouldAddToHistory: true
 }
