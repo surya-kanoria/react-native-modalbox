@@ -11,8 +11,6 @@ import {
     Platform
 } from 'react-native';
 
-const screen = Dimensions.get('window');
-
 const styles = StyleSheet.create({
 
     wrapper: {
@@ -36,7 +34,8 @@ const styles = StyleSheet.create({
 export default class ModalBox extends React.Component{
     constructor(props) {
         super(props);
-        const position = this.props.inplace ? 0 : this.props.entry === 'top' ? -screen.height : screen.height;
+        this.contentScreen = Dimensions.get('window');
+        const position = this.props.inplace ? 0 : this.props.entry === 'top' ? -this.contentScreen.height : this.contentScreen.height;
         this.state = {
             position: new Animated.Value(position),
             backdropOpacity: new Animated.Value(0),
@@ -44,10 +43,10 @@ export default class ModalBox extends React.Component{
             isAnimateClose: false,
             isAnimateOpen: false,
             swipeToClose: false,
-            height: screen.height,
-            width: screen.width,
-            containerHeight: screen.height,
-            containerWidth: screen.width,
+            height: this.contentScreen.height,
+            width: this.contentScreen.width,
+            containerHeight: this.contentScreen.height,
+            containerWidth: this.contentScreen.width,
             isInitialized: false
         };
     }
@@ -58,7 +57,10 @@ export default class ModalBox extends React.Component{
     }
 
     componentWillReceiveProps(nextProps) {
-        this.handleOpenning(nextProps);
+        // Since handleOpenning only checks for isOpen, so we should have a check here for the prop change.
+        if(nextProps.isOpen !== this.props.isOpen) {
+            this.handleOpenning(nextProps);
+        }
     }
 
     handleOpenning = (props) => {
@@ -178,7 +180,7 @@ export default class ModalBox extends React.Component{
         this.state.animClose = Animated.timing(
             this.state.position,
             {
-                toValue: this.props.inplace ? 0 : this.props.entry === 'top' ? -(this.state.containerHeight + screen.height) : (this.state.containerHeight + screen.height),
+                toValue: this.props.inplace ? 0 : this.props.entry === 'top' ? -(this.state.containerHeight + this.contentScreen.height) : (this.state.containerHeight + this.contentScreen.height),
                 duration: this.props.animationDuration,
                 easing: Easing.bezier(0.4, 0, 0.2, 1)
             }
@@ -331,7 +333,7 @@ export default class ModalBox extends React.Component{
     render() {
         var visible = this.state.isOpen || this.state.isAnimateOpen || this.state.isAnimateClose;
         var size = { height: this.state.containerHeight, width: this.state.containerWidth };
-        var offsetX = (this.state.containerWidth - this.state.width) / 2;
+        var offsetX = this.props.inplace ? 0 : (this.state.containerWidth - this.state.width) / 2;
         var backdrop = this.renderBackdrop(size);
 
         if (!visible) {
@@ -360,24 +362,46 @@ export default class ModalBox extends React.Component{
                 this.animateOpen();
             };
             this.setState({ isAnimateOpen: true });
-            if (window && window.history && window.history.pushState) {
-                window.history.pushState(null, document.title, window.location.href)
-                window.addEventListener('popstate', function () {
-                    this.close(false);
-                }.bind(this));
+            if (window && window.history && window.history.pushState && this.props.shouldAddToHistory) {
+                // Since we can have multiple instances of modalBox then all instances will listen to popstate.
+                // So all the instance will close with a single back.
+                // To make it work we will pass the id (default id is 'MODAL_BOX') to each instance and we will use that id to decide which instance to close.
+                window.currState = {id: this.props.id};
+                window.history.pushState(window.currState, document.title, window.location.href);
+                // added a registry in batman that will subscribe to popstate once and we will subscribe to registry to avoid multiple onpopstate subscriptions.
+                if (window.HistoryPopStateRegistry) {
+                    window.HistoryPopStateRegistry.subscribe({callback: this.popStateHandler, stopImmediatePropagation: this.props.stopImmediatePropagation});
+                } else {
+                    window.addEventListener('popstate', this.popStateHandler);
+                }
             }
         }
-
     }
 
-    close = (goBack = true) => {
+    popStateHandler = (event) => {
+        if(window.currState && window.currState.id === this.props.id && this.state.isOpen) {
+            window.currState = event.state;
+            this.closeModal();
+            if (window.HistoryPopStateRegistry) {
+                window.HistoryPopStateRegistry.unsubscribe({callback: this.popStateHandler});
+            } else {
+                window.removeEventListener('popstate', this.popStateHandler);
+            }
+        }
+    }
+
+    closeModal = () => {
         if (this.props.isDisabled) return;
         if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen)) {
             delete this.onViewLayoutCalculated;
             this.animateClose();
-            if (goBack && window && window.history && window.history.back) {
-                window.history.back();
-            }
+        }
+    }
+
+    close = () => {
+        if (this.props.isDisabled) return;
+        if (!this.state.isAnimateClose && (this.state.isOpen || this.state.isAnimateOpen) && window && window.history && this.props.shouldAddToHistory) {
+            window.history.back();
         }
     }
 };
@@ -394,5 +418,8 @@ ModalBox.defaultProps = {
     animationDuration: 400,
     inplace: false,
     showFullscreen: false,
-    resizeToFullscreen: false
+    resizeToFullscreen: false,
+    id: 'MODAL_BOX',
+    stopImmediatePropagation: false,
+    shouldAddToHistory: true
 }
